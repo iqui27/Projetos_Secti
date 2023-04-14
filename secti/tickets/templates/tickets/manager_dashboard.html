@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load custom_tags %}
+
+{% block content %}
+<style>
+  .highlight-row {
+    background-color: #f8d7da;
+  }
+</style>
+  <h2 class="mb-4">Painel do Gerente</h2>
+  <div class="card mb-4">
+    <div class="card-header">
+      </div>
+      <h3>Estatísticas</h3>
+    </div>
+    <div class="card-body">
+      <p>Tempo médio de resolução dos tickets: {% if avg_resolution_time %}{{ avg_resolution_time|to_hours_minutes }}{% else %}N/A{% endif %}</p>
+      <!-- Restante das estatísticas... -->
+      <p>Total de tickets: {{ total_tickets }}</p>
+      <p>Tickets abertos: {{ open_tickets }}</p>
+      <p>Tickets em processo: {{ in_process_tickets }}</p>
+      <p>Tickets pendentes: {{ pending_tickets }}</p>
+      <p>Tickets resolvidos: {{ resolved_tickets }}</p>
+    </div>
+  </div>
+  <a href="{% url 'tickets:closed_tickets' %}" class="btn btn-secondary">Tickets Fechados</a>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Motivo</th>
+          <th>Nome</th>
+          <th>Setor</th>
+          <th>Categoria</th>
+          <th>Status</th>
+          <th>Prioridade</th>
+          <th>Data Criação</th>
+          <th>Data Finalizado</th>
+          <th>Ações</th>
+        </tr>
+        </div>
+      </thead>
+      <tbody>
+        {% for ticket in tickets %}
+          {% days_difference ticket.data_criacao ticket.data_atualizacao as days_passed %}
+          <tr class="{% if days_passed > 5 %}highlight-row{% endif %}">
+          <tr>
+            <td>{{ ticket.id }}</td>
+            <td>{{ ticket.motivo }}</td>
+            <td>{{ ticket.nome }}</td>
+            <td>{{ ticket.setor }}</td>
+            <td>{{ ticket.categoria }}</td>
+            <td>{{ ticket.status_name }}</td>
+            <td>{{ ticket.get_priority_name }}</td>
+            <td>{{ ticket.data_criacao }}</td>
+            <td>{{ ticket.data_finalizado }}</td>
+            <td>
+              <a href="{% url 'tickets:edit_ticket' ticket.id %}" class="btn btn-primary btn-sm">Editar</a>
+              <a class="btn btn-danger btn-sm" href="{% url 'tickets:delete_ticket' ticket.id %}" onclick="return confirm('Tem certeza que deseja excluir este ticket?');">Excluir</a>
+              <a href="{% url 'tickets:ticket_notes' ticket.id %}" class="btn btn-info btn-sm">Notas</a>
+            </td>
+            <td>
+              <select class="form-control change-status" data-ticket-id="{{ ticket.id }}">
+                {% for value, name in ticket.STATUS_CHOICES %}
+                  <option value="{{ value }}" {% if ticket.status == value %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+              </select>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <a href="{% url 'tickets:user_logout' %}" class="btn btn-danger">Logout</a>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    document.querySelectorAll('.change-status').forEach((select) => {
+      select.addEventListener('change', (event) => {
+        const ticketId = event.target.dataset.ticketId;
+        const newStatus = event.target.value;
+
+        fetch(`{% url 'tickets:change_status' 0 %}`.replace('0', ticketId), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}',
+          },
+          body: `new_status=${newStatus}`,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              alert(data.message);
+            } else {
+              alert('Erro ao atualizar o status: ' + data.message);
+            }
+          });
+      });
+    });
+  </script>
+{% endblock %}

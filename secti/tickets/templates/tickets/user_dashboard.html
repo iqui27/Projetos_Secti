@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="my-4">Painel do Usuário</h2>
+<h5>{{ request.user.get_full_name }}</h5>
+<a href="{% url 'tickets:edit_profile' %}">Editar perfil</a>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Motivo</th>
+        <th scope="col">Setor</th>
+        <th scope="col">Categoria</th>
+        <th scope="col">Prioridade</th>
+        <th scope="col">Status</th>
+        <th scope="col">Ações</th>
+        <th scope="col">Notas</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ticket in tickets %}
+        <tr>
+          <td>{{ ticket.id }}</td>
+          <td>{{ ticket.motivo }}</td>
+          <td>{{ ticket.setor }}</td>
+          <td>{{ ticket.categoria }}</td>
+          <td>{{ ticket.get_priority_name }}</td>
+          <td>{{ ticket.status_name }}</td>
+          <td>{{ ticket.nota }}</td>
+          <td>
+            <a class="btn btn-primary btn-sm" href="{% url 'tickets:edit_ticket' ticket.id %}">Editar</a>
+            <a class="btn btn-danger btn-sm" href="{% url 'tickets:delete_ticket' ticket.id %}" onclick="return confirm('Tem certeza que deseja excluir este ticket?');">Excluir</a>
+            <a href="{% url 'tickets:ticket_notes' ticket.id %}" class="btn btn-info btn-sm">Notas</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="mb-3">
+    <a href="{% url 'tickets:create_ticket' %}" class="btn btn-primary">Criar Ticket</a>
+  </div>
+  <!-- Adicione esta tabela com os tickets resolvidos -->
+<h3 class="mt-4">Tickets Resolvidos</h3>
+<table class="table">
+  <thead>
+  </thead>
+  <tbody>
+    {% for ticket in resolved_tickets %}
+      <tr>
+        <td>{{ ticket.id }}</td>
+        <td>{{ ticket.motivo }}</td>
+        <td>{{ ticket.setor }}</td>
+        <td>{{ ticket.nota }}</td>
+        <td>{{ ticket.categoria }}</td>
+        <td>{{ ticket.get_priority_name }}</td>
+        <td>{{ ticket.status_name }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<div>
+  <a href="{% url 'tickets:user_logout' %}" class="btn btn-danger">Logout</a>
+</div>
+{% endblock %}
+

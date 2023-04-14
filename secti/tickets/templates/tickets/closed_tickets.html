@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="my-4">Tickets Fechados</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Motivo</th>
+          <th>Nome</th>
+          <th>Setor</th>
+          <th>Categoria</th>
+          <th>Status</th>
+          <th>Prioridade</th>
+          <th>Data Criação</th>
+          <th>Data Finalizado</th>
+          <th>Nota</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in tickets %}
+          <tr>
+            <td>{{ ticket.id }}</td>
+            <td>{{ ticket.motivo }}</td>
+            <td>{{ ticket.nome }}</td>
+            <td>{{ ticket.setor }}</td>
+            <td>{{ ticket.categoria }}</td>
+            <td>{{ ticket.status_name }}</td>
+            <td>{{ ticket.get_priority_name }}</td>
+            <td>{{ ticket.data_criacao }}</td>
+            <td>{{ ticket.data_finalizado }}</td>
+            <td>{{ ticket.nota }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div>
+    <a href="{% url 'tickets:manager_dashboard' %}" class="btn btn-primary">Voltar ao Painel do Gerente</a>
+  </div>
+{% endblock %}
